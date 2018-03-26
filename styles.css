@@ -8,24 +8,37 @@ h1 {
   padding: 0px;
 }
 
+#Settings input[type=button] {
+  background-color: #7DA;
+}
+#Settings input[type=button]:active {
+  background-color: #5B8;
+}
+
+#Generating input[type=button] {
+  background-color: #7CE;
+}
+#Generating input[type=button]:active {
+  background-color: #5AC;
+}
+
+#Solving input[type=button] {
+  background-color: #B6A;
+}
+#Solving input[type=button]:active {
+  background-color: #948;
+}
+
 input[type=button] {
   width: 80px;
   height: 25px;
   border: none;
   border-radius: 5px;
-  background-color: #8DE;
   color: black;
+  outline: none;
   margin: 1px 2px;
   padding: 4px 0px;
-  font-size: 15px;
+  font-size: 16px;
   cursor: pointer;
   box-shadow: 2px 2px 2px #222;
-}
-
-input[type=button]:active {
-  background-color: #8AE;
-}
-
-input[type=button]:focus {
-  outline: none;
 }

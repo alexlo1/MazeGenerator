@@ -2,9 +2,10 @@
 
 var WIDTH = 600;
 var HEIGHT = 600;
+var MIN = 10;
 var MAX = 100;
-var ROWS = 35;
-var COLS = 35;
+var ROWS = 31;
+var COLS = 31;
 var PATH_ROWS = (ROWS - 1) / 2;
 var PATH_COLS = (COLS - 1) / 2;
 var TILE_WIDTH = WIDTH / ROWS;
@@ -34,12 +35,16 @@ function Tile(row, col) {
 
   this.draw = function() {
     if(this.highlight) {
-      fill(0, 200, 250);
+      stroke(0, 255, 200);
+      fill(0, 255, 200);
     } else if(this.isPathTile) {
+      stroke(255);
       fill(255);
     } else if(this.isOpenWall) {
+      stroke(255);
       fill(255);
     } else {
+      stroke(0);
       fill(0);
     }
     rect(this.x, this.y, TILE_WIDTH, TILE_HEIGHT);
@@ -50,7 +55,6 @@ function Tile(row, col) {
 /* required by processing, initial setup */
 function setup() {
   createCanvas(WIDTH, HEIGHT);
-  noStroke();
   background(0);
   reset();
   noLoop();
@@ -96,6 +100,7 @@ function reset() {
   redraw();
 }
 
+/* Clear highlighted solution path */
 function unsolve() {
   for(var r = 0; r < ROWS; r++) {
     for(var c = 0; c < COLS; c++) {
@@ -107,7 +112,7 @@ function unsolve() {
 
 /* For the larger/smaller buttons, changes the size of the maze */
 function changeSize(delta) {
-  if(ROWS + delta > 0 && COLS + delta > 0 &&
+  if(ROWS + delta > MIN && COLS + delta > MIN &&
      ROWS + delta < MAX && COLS + delta < MAX) {
     ROWS += delta;
     COLS += delta;
@@ -356,14 +361,14 @@ function randomKruskal() {
  * While queue is not empty, dequeue, enqueue neighbors that are connected
  * When goal is found, retrace steps using previous tile variable
  */
-function bfsSolve() {
+function bfsSolve(startr, startc) {
   if(!generated) {
     alert('Please generate a maze first.');
     return;
   }
   clearPrev();
   var queue = [];
-  queue[0] = pathTiles[0][0];
+  queue[0] = pathTiles[startr][startc];
   queue[0].highlight = true;
   var front = 0;
   var back = 0;
@@ -389,12 +394,11 @@ function bfsSolve() {
       }
     }
     front++;
-    console.log(front);
   }
 
   // starting from end goal, loop through previous and highlight
   var ptr = queue[front];
-  while(ptr != pathTiles[0][0]) {
+  while(ptr != pathTiles[startr][startc]) {
     ptr.highlight = true;
     tiles[(ptr.r + ptr.prev.r) / 2][(ptr.c + ptr.prev.c) / 2].highlight = true;
     ptr = ptr.prev;

@@ -9,7 +9,10 @@
 <body>
 	<h1>Maze Generator</h1>
 	<table>
-		<tr>
+		<tr id="Settings">
+			<td>
+				General Settings:
+			</td>
 			<td>
 				<input type="button" value="Reset" onclick="reset()">
 			</td>
@@ -20,7 +23,10 @@
 				<input type="button" value="Smaller" onclick="changeSize(-10)">
 			</td>
 		</tr>
-		<tr>
+		<tr id="Generating">
+			<td>
+				Maze Generation:
+			</td>
 			<td>
 				<input type="button" value="DFS" onclick="backtrack()">
 			</td>
@@ -31,9 +37,12 @@
 				<input type="button" value="Kruskal" onclick="randomKruskal()">
 			</td>
 		</tr>
-		<tr>
+		<tr id="Solving">
 			<td>
-				<input type="button" value="Solve!" onclick="bfsSolve()">
+				Maze Solving:
+			</td>
+			<td>
+				<input type="button" value="Solve!" onclick="bfsSolve(0, 0)">
 			</td>
 			<td>
 				<input type="button" value="Unsolve!" onclick="unsolve()">
