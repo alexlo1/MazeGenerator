@@ -2,8 +2,9 @@
 
 var WIDTH = 600;
 var HEIGHT = 600;
-var ROWS = 45;
-var COLS = 45;
+var MAX = 100;
+var ROWS = 35;
+var COLS = 35;
 var PATH_ROWS = (ROWS - 1) / 2;
 var PATH_COLS = (COLS - 1) / 2;
 var TILE_WIDTH = WIDTH / ROWS;
@@ -33,11 +34,11 @@ function Tile(row, col) {
 
   this.draw = function() {
     if(this.highlight) {
-      fill(0, 200, 100);
+      fill(0, 200, 250);
     } else if(this.isPathTile) {
-      fill(200);
+      fill(255);
     } else if(this.isOpenWall) {
-      fill(200);
+      fill(255);
     } else {
       fill(0);
     }
@@ -52,6 +53,7 @@ function setup() {
   noStroke();
   background(0);
   reset();
+  noLoop();
 }
 
 /* required by processing, constantly runs */
@@ -88,6 +90,41 @@ function reset() {
       pathTiles[i][j] = tiles[2 * i + 1][2 * j + 1];
       pathTiles[i][j].isPathTile = true;
       unexplored++;
+    }
+  }
+
+  redraw();
+}
+
+function unsolve() {
+  for(var r = 0; r < ROWS; r++) {
+    for(var c = 0; c < COLS; c++) {
+      tiles[r][c].highlight = false;
+    }
+  }
+  redraw();
+}
+
+/* For the larger/smaller buttons, changes the size of the maze */
+function changeSize(delta) {
+  if(ROWS + delta > 0 && COLS + delta > 0 &&
+     ROWS + delta < MAX && COLS + delta < MAX) {
+    ROWS += delta;
+    COLS += delta;
+    PATH_ROWS = (ROWS - 1) / 2;
+    PATH_COLS = (COLS - 1) / 2;
+    TILE_WIDTH = WIDTH / ROWS;
+    TILE_HEIGHT = HEIGHT / COLS;
+    reset();
+  }
+}
+
+/* Before solving, clear previouses and visited */
+function clearPrev() {
+  for(var r = 0; r < ROWS; r++) {
+    for(var c = 0; c < COLS; c++) {
+      tiles[r][c].prev = tiles[r][c];
+      tiles[r][c].visited = false;
     }
   }
 }
@@ -175,7 +212,7 @@ function addEdge(a, b) {
   }
 }
 
-// Main Maze-solving Methods --------------------------------------------------
+// Main Maze-generating Methods --------------------------------------------------
 
 /* DFS / Backtracking algorithm
  * Random initial tile, mark as visited
@@ -211,6 +248,7 @@ function backtrack() {
     }
   }
   generated = true;
+  redraw();
 }
 
 /* Prim's algorithm (using tiles instead of edges)
@@ -254,6 +292,7 @@ function randomPrim() {
     unexplored--;
   }
   generated = true;
+  redraw();
 }
 
 /* Kruskal's algorithm
@@ -266,6 +305,7 @@ function randomPrim() {
  */
 function randomKruskal() {
   reset();
+  clearPrev();
 
   // create a list of all of the walls
   var wallList = [];
@@ -297,10 +337,67 @@ function randomKruskal() {
       tile1 = tiles[currWall.r - 1][currWall.c];
       tile2 = tiles[currWall.r + 1][currWall.c];
     }
-    // if there is no path from one wall to other: remove wall, unionize
+    // if there is no path from one wall to other:
+    // remove wall, unionize with disjoint set methods
     if(findRoot(tile1) != findRoot(tile2)) {
       currWall.isOpenWall = true;
       addEdge(tile1, tile2);
     }
   }
+  generated = true;
+  redraw();
+}
+
+// Main Maze-solving Methods --------------------------------------------------
+
+/* BFS algorithm
+ * Uses a queue
+ * Enqueue start pointer
+ * While queue is not empty, dequeue, enqueue neighbors that are connected
+ * When goal is found, retrace steps using previous tile variable
+ */
+function bfsSolve() {
+  if(!generated) {
+    alert('Please generate a maze first.');
+    return;
+  }
+  clearPrev();
+  var queue = [];
+  queue[0] = pathTiles[0][0];
+  queue[0].highlight = true;
+  var front = 0;
+  var back = 0;
+
+  // while queue has elements:
+  while(back - front + 1 > 0) {
+    // if target is found, quit
+    if(queue[front].pathR == PATH_ROWS - 1 &&
+       queue[front].pathC == PATH_COLS - 1) {
+      break;
+    }
+
+    // otherwise get unexplored neighbors and enqueue if the wall is open
+    var un = getNeighbors(queue[front].pathR, queue[front].pathC, false);
+    for(var t = 0; t < un.length; t++) {
+      if(!queue.includes(un[t])) {
+        var wall = tiles[(un[t].r + queue[front].r) / 2]
+                        [(un[t].c + queue[front].c) / 2];
+        if(wall.isOpenWall) {
+          queue[++back] = un[t];
+          un[t].prev = queue[front];
+        }
+      }
+    }
+    front++;
+    console.log(front);
+  }
+
+  // starting from end goal, loop through previous and highlight
+  var ptr = queue[front];
+  while(ptr != pathTiles[0][0]) {
+    ptr.highlight = true;
+    tiles[(ptr.r + ptr.prev.r) / 2][(ptr.c + ptr.prev.c) / 2].highlight = true;
+    ptr = ptr.prev;
+  }
+  redraw();
 }

@@ -2,3 +2,30 @@ body {
   font-family: "Trebuchet MS", "Lucida Grande",
   "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
 }
+
+h1 {
+  margin: 0px;
+  padding: 0px;
+}
+
+input[type=button] {
+  width: 80px;
+  height: 25px;
+  border: none;
+  border-radius: 5px;
+  background-color: #8DE;
+  color: black;
+  margin: 1px 2px;
+  padding: 4px 0px;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 2px 2px 2px #222;
+}
+
+input[type=button]:active {
+  background-color: #8AE;
+}
+
+input[type=button]:focus {
+  outline: none;
+}
