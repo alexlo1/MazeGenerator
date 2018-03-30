@@ -256,6 +256,44 @@ function backtrack() {
   redraw();
 }
 
+/* BFS algorithm
+ * Random initial tile, mark as visited
+ * While there are unexplored cells:
+ *     If current tile has unexplored neighbors:
+ *         Enqueue current tile to the queue
+ *         Pick a random unexplored neighbor
+ *         Remove wall between neighbor and current
+ *         Neighbor becomes current tile
+ *     Else if stack is not empty:
+ *         Current tile is the front of the queue, which is dequeued
+ */
+function bfs() {
+  reset();
+  var q = [];
+  var qFront = -1;
+  var qBack = -1;
+  var currTile = pathTiles[int(random(PATH_ROWS))][int(random(PATH_COLS))];
+  currTile.visited = true;
+  unexplored--;
+  while(unexplored > 0) {
+    var un = getNeighbors(currTile.pathR, currTile.pathC, false);
+    if(un.length > 0 && un.length <= 4) {
+      q[++qBack] = currTile;
+      var currNeighbor = getNeighbor(currTile.pathR, currTile.pathC, un);
+      var wallR = (currTile.r + currNeighbor.r) / 2;
+      var wallC = (currTile.c + currNeighbor.c) / 2;
+      tiles[wallR][wallC].isOpenWall = true;
+      currTile = currNeighbor;
+      currTile.visited = true;
+      unexplored--;
+    } else {
+      currTile = q[++qFront];
+    }
+  }
+  generated = true;
+  redraw();
+}
+
 /* Prim's algorithm (using tiles instead of edges)
  * Random initial tile, mark as visited
  * While there are unexplored cells:
